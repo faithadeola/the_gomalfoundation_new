@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { AnimatePresence, motion } from "motion/react";
 import { contents } from "@contents";
+import { Rise } from "@ui/components/reveal/rise";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -59,7 +60,8 @@ export function GallerySection() {
     () => {
       const mm = gsap.matchMedia();
 
-      mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
+      // the full theatre runs on every viewport — mobile included
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
         const stage = scope.current;
         if (!stage) return;
 
@@ -145,14 +147,14 @@ export function GallerySection() {
     <section
       id="gallery"
       ref={scope}
-      className="texture-grain relative overflow-hidden bg-evergreen text-parchment md:motion-safe:h-svh"
+      className="texture-grain relative overflow-hidden bg-evergreen text-parchment motion-safe:h-svh"
     >
       <svg aria-hidden className="absolute inset-0 z-0 w-full h-full opacity-[0.04]">
         <rect width="100%" height="100%" fill="url(#hero-arches)" />
       </svg>
 
-      {/* ───────── theatre ───────── */}
-      <div className="hidden md:motion-safe:block absolute inset-0">
+      {/* ───────── theatre — all viewports ───────── */}
+      <div className="hidden motion-safe:block absolute inset-0">
         {/* the sweeping title */}
         <div className="ga-title absolute inset-x-0 top-[44%] text-center opacity-0 pointer-events-none">
           <p className="text-[12px] font-semibold tracking-[0.22em] uppercase text-blush mb-3">{gallery.eyebrow}</p>
@@ -189,9 +191,9 @@ export function GallerySection() {
                     key={`${image.src}-${i}`}
                     type="button"
                     onClick={() => setLightbox(image)}
-                    className="ga-photo shrink-0 w-[19vw] will-change-transform cursor-zoom-in"
+                    className="ga-photo shrink-0 w-[42vw] md:w-[19vw] will-change-transform cursor-zoom-in"
                   >
-                    <div className="bg-parchment p-[0.4vw] pb-[1.4vh] rounded-sm shadow-[0_14px_36px_rgba(4,26,21,0.5)]">
+                    <div className="bg-parchment p-[1vw] md:p-[0.4vw] pb-[1.4vh] rounded-sm shadow-[0_14px_36px_rgba(4,26,21,0.5)]">
                       <div className="relative aspect-[4/3] overflow-hidden">
                         <Image src={image.src} alt={image.alt} fill sizes="19vw" className="object-cover" />
                       </div>
@@ -217,9 +219,9 @@ export function GallerySection() {
           <button
             type="button"
             onClick={() => setLightbox(gallery.centerpiece)}
-            className="ga-center absolute z-50 -ml-[17vw] -mt-[21vh] w-[34vw] opacity-0 cursor-zoom-in text-left"
+            className="ga-center absolute z-50 -ml-[39vw] -mt-[18vh] w-[78vw] md:-ml-[17vw] md:-mt-[21vh] md:w-[34vw] opacity-0 cursor-zoom-in text-left"
           >
-            <div className="bg-parchment p-[0.7vw] pb-[3.2vh] rounded-sm shadow-[0_36px_90px_rgba(4,26,21,0.65)]">
+            <div className="bg-parchment p-[1.4vw] md:p-[0.7vw] pb-[3.2vh] rounded-sm shadow-[0_36px_90px_rgba(4,26,21,0.65)]">
               <div className="relative aspect-[4/3] overflow-hidden">
                 <Image
                   src={gallery.centerpiece.src}
@@ -237,47 +239,51 @@ export function GallerySection() {
         </div>
       </div>
 
-      {/* ───────── side-to-side fallback (mobile / reduced motion) ───────── */}
-      <div className="md:motion-safe:hidden relative z-10 py-16">
-        <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-blush mb-2 text-center px-6">
-          {gallery.eyebrow}
-        </p>
-        <p
-          className="text-center font-display font-black uppercase text-[clamp(1.75rem,7vw,2.5rem)] mb-8 px-6"
-          style={{ fontVariationSettings: "'wdth' 84" }}
-        >
-          {gallery.heading}
-        </p>
+      {/* ───────── reduced-motion fallback ───────── */}
+      <div className="motion-safe:hidden relative z-10 py-16 overflow-x-clip">
+        <div className="px-6 text-center">
+          <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-blush mb-2">
+            {gallery.eyebrow}
+          </p>
+          <p
+            className="font-display font-black uppercase text-[clamp(1.75rem,7vw,2.5rem)] mb-8"
+            style={{ fontVariationSettings: "'wdth' 84" }}
+          >
+            {gallery.heading}
+          </p>
+        </div>
         <div className="space-y-4">
           {strips.map((strip, r) => (
-            <div key={r} className="overflow-x-auto snap-x snap-mandatory flex gap-3 px-6 pb-2">
+            <div key={r} className="overflow-x-auto snap-x flex gap-3 px-6 pb-2">
               {strip.slice(0, 8).map((image, i) => (
                 <button
                   key={`${image.src}-${i}`}
                   type="button"
                   onClick={() => setLightbox(image)}
-                  className="snap-center shrink-0 w-[68vw] bg-parchment p-2 pb-4 rounded-sm cursor-zoom-in"
+                  className="snap-center shrink-0 w-[62vw] sm:w-[30vw] bg-parchment p-2 pb-4 rounded-sm cursor-zoom-in"
                 >
                   <div className="relative aspect-[4/3]">
-                    <Image src={image.src} alt={image.alt} fill sizes="68vw" className="object-cover" />
+                    <Image src={image.src} alt={image.alt} fill sizes="62vw" className="object-cover" />
                   </div>
                 </button>
               ))}
             </div>
           ))}
         </div>
-        <button
-          type="button"
-          onClick={() => setLightbox(gallery.centerpiece)}
-          className="block mt-8 mx-6 max-w-[420px] sm:mx-auto bg-parchment p-2 pb-6 rounded-sm relative cursor-zoom-in text-left"
-        >
-          <div className="relative aspect-[4/3]">
-            <Image src={gallery.centerpiece.src} alt={gallery.centerpiece.alt} fill sizes="90vw" className="object-cover" />
-          </div>
-          <p className="serif-soft absolute bottom-1 inset-x-0 text-center font-serif italic text-ink text-[0.75rem]">
-            {gallery.centerpiece.caption}
-          </p>
-        </button>
+        <div className="mt-10 px-6">
+          <button
+            type="button"
+            onClick={() => setLightbox(gallery.centerpiece)}
+            className="block max-w-[420px] mx-auto bg-parchment p-2 pb-6 rounded-sm relative cursor-zoom-in text-left w-full"
+          >
+            <div className="relative aspect-[4/3]">
+              <Image src={gallery.centerpiece.src} alt={gallery.centerpiece.alt} fill sizes="90vw" className="object-cover" />
+            </div>
+            <p className="serif-soft absolute bottom-1 inset-x-0 text-center font-serif italic text-ink text-[0.75rem]">
+              {gallery.centerpiece.caption}
+            </p>
+          </button>
+        </div>
       </div>
 
       {/* ───────── the lightbox ───────── */}

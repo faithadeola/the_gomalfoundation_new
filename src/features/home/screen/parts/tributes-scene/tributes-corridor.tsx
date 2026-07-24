@@ -5,10 +5,8 @@ import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { motion } from "motion/react";
 import { contents } from "@contents";
 import { ROUTES } from "@shared/constants/routes";
-import { useTheatreMode } from "@shared/hooks/use-theatre-mode";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -42,7 +40,6 @@ function heartSlot(index: number, total: number): { x: number; y: number } {
  */
 export function TributesCorridor() {
   const scope = useRef<HTMLElement>(null);
-  const theatre = useTheatreMode();
   const { multiplicationWall, tributes } = contents;
 
   const featured = multiplicationWall.featuredTributes;
@@ -51,6 +48,101 @@ export function TributesCorridor() {
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
+
+      // mobile: same beats, in flow — plate folds, curtain sweeps in,
+      // each featured card gets its own scroll slot and its own side
+      mm.add("(max-width: 767.98px) and (prefers-reduced-motion: no-preference)", () => {
+        const stage = scope.current?.querySelector<HTMLElement>(".mtv-stage");
+        if (!stage) return;
+
+        // plate fold + curtain arrival
+        const intro = gsap.timeline({
+          paused: true,
+          scrollTrigger: {
+            trigger: stage,
+            start: "top 78%",
+            toggleActions: "play none none reverse",
+          },
+        });
+        intro.to(".mtv-line", { y: "-115%", stagger: 0.12, duration: 0.7, ease: "power2.in" }, 0);
+        intro.fromTo(
+          ".mtv-curtain",
+          { xPercent: -101 },
+          { xPercent: 0, duration: 0.9, ease: "power3.inOut" },
+          0.35
+        );
+
+        const sides = [
+          { from: { x: "-80vw", y: "0vh" }, to: { x: "80vw", y: "0vh" } },
+          { from: { x: "80vw", y: "0vh" }, to: { x: "-80vw", y: "0vh" } },
+          { from: { x: "0vw", y: "-55vh" }, to: { x: "0vw", y: "55vh" } },
+          { from: { x: "0vw", y: "55vh" }, to: { x: "0vw", y: "-55vh" } },
+        ];
+        gsap.utils.toArray<HTMLElement>(".mtv-slot").forEach((slot, f) => {
+          const card = slot.querySelector(".mtv-card");
+          const side = sides[f % sides.length];
+          if (!card) return;
+          // arrives from its side, growing toward the centre (scrubbed)
+          gsap.fromTo(
+            card,
+            { ...side.from, scale: 0.55, autoAlpha: 0.2, rotation: jig(f * 5 + 1, 8) },
+            {
+              x: "0vw",
+              y: "0vh",
+              scale: 1,
+              autoAlpha: 1,
+              rotation: 0,
+              ease: "none",
+              scrollTrigger: { trigger: slot, start: "top 88%", end: "center 58%", scrub: 0.6 },
+            }
+          );
+          // departs through the opposite side
+          gsap.to(card, {
+            ...side.to,
+            scale: 0.6,
+            autoAlpha: 0,
+            ease: "none",
+            scrollTrigger: { trigger: slot, start: "center 42%", end: "bottom 12%", scrub: 0.6 },
+          });
+          // typewriter fires when the card holds the centre
+          const caret = slot.querySelector(".mtv-caret");
+          const type = gsap.timeline({
+            paused: true,
+            scrollTrigger: { trigger: slot, start: "center 62%", toggleActions: "play none none reverse" },
+          });
+          if (caret) type.fromTo(caret, { autoAlpha: 1 }, { autoAlpha: 1, duration: 0.01 }, 0);
+          type.fromTo(
+            slot.querySelectorAll(".mtv-char"),
+            { autoAlpha: 0 },
+            { autoAlpha: 1, stagger: 0.005, duration: 0.01, ease: "none" },
+            0.05
+          );
+          if (caret) type.to(caret, { autoAlpha: 0, duration: 0.15 }, "+=0.1");
+          type.fromTo(
+            slot.querySelectorAll(".mtv-author"),
+            { autoAlpha: 0 },
+            { autoAlpha: 1, stagger: 0.008, duration: 0.01, ease: "none" },
+            "-=0.1"
+          );
+        });
+
+        // the seal stamps in
+        const seal = gsap.timeline({
+          paused: true,
+          scrollTrigger: {
+            trigger: ".mtv-sealwrap",
+            start: "top 80%",
+            toggleActions: "play none none reverse",
+          },
+        });
+        seal.fromTo(
+          ".mtv-seal",
+          { scale: 2, rotation: -20, autoAlpha: 0 },
+          { scale: 1, rotation: -6, autoAlpha: 1, duration: 0.55, ease: "power3.in" }
+        );
+        seal.fromTo(".mtv-sealring", { scale: 0.6, autoAlpha: 0.7 }, { scale: 1.6, autoAlpha: 0, duration: 0.5 });
+        seal.fromTo(".mtv-readall", { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.5 }, "-=0.2");
+      });
 
       mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
         const stage = scope.current;
@@ -322,46 +414,88 @@ export function TributesCorridor() {
         </div>
       </div>
 
-      {/* ───────── flowing fallback ───────── */}
-      <div className="md:motion-safe:hidden relative z-10 max-w-[760px] mx-auto px-6 py-20">
-        <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-coral mb-3 text-center">
-          {tributes.page.eyebrow}
-        </p>
-        <p
-          className="text-center font-display font-black uppercase text-ink text-[clamp(1.75rem,7vw,2.5rem)] mb-10"
-          style={{ fontVariationSettings: "'wdth' 84" }}
-        >
-          {tributes.page.headingCount} {tributes.page.headingSuffix}
-        </p>
-        <div className="space-y-5">
-          {featured.slice(0, 3).map((tribute, i) => (
-            <motion.blockquote
-              key={tribute.id}
-              initial={theatre ? false : { y: 30, opacity: 0 }}
-              whileInView={theatre ? undefined : { y: 0, opacity: 1 }}
-              viewport={{ once: true, amount: 0.4 }}
-              transition={{ delay: i * 0.1, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              className="rounded-xl bg-parchment-deep/60 border border-ink/10 px-6 py-5"
+      {/* ───────── mobile — the same beats, in flow ───────── */}
+      <div className="md:motion-safe:hidden relative z-10">
+        {/* white title plate */}
+        <div className="px-6 pt-20 pb-14 text-center">
+          <span className="block overflow-hidden">
+            <span className="mtv-line block text-[11px] font-semibold tracking-[0.2em] uppercase text-coral">
+              {tributes.page.eyebrow}
+            </span>
+          </span>
+          <span className="block overflow-hidden mt-3">
+            <span
+              className="mtv-line block font-display font-black uppercase text-ink text-[clamp(1.25rem,5.5vw,1.75rem)]"
+              style={{ fontVariationSettings: "'wdth' 84" }}
             >
-              <p className="serif-soft font-serif italic text-[0.9375rem] leading-[1.55]">
-                &ldquo;{tribute.text}&rdquo;
-              </p>
-              <footer className="mt-3 text-[0.75rem] font-semibold text-ink/60">
-                {tribute.name} · {tribute.relation}
-              </footer>
-            </motion.blockquote>
-          ))}
+              {tributes.page.headingCount} {tributes.page.headingSuffix}
+            </span>
+          </span>
+          <span className="block overflow-hidden mt-1">
+            <span
+              className="mtv-line block font-display font-black uppercase text-evergreen-deep text-[clamp(3.5rem,17vw,6rem)] leading-[0.95]"
+              style={{ fontVariationSettings: "'wdth' 84" }}
+            >
+              {tributes.page.bigTitle}
+            </span>
+          </span>
         </div>
-        <div className="mt-10 flex flex-col items-center gap-4">
-          <Link
-            href={ROUTES.TRIBUTES}
-            className="inline-flex items-center rounded-full bg-coral text-ink text-[0.875rem] font-semibold px-6 py-3"
-          >
-            {multiplicationWall.ctas.addTribute}
-          </Link>
-          <Link href={ROUTES.TRIBUTES} className="text-[0.8125rem] font-semibold text-coral underline underline-offset-4">
-            {multiplicationWall.ctas.readAll}
-          </Link>
+
+        {/* the green stage — curtain arrives from the left, then the
+            four readings, each from its own side */}
+        <div className="mtv-stage relative overflow-hidden bg-parchment">
+          <div className="mtv-curtain absolute inset-0 bg-evergreen-deep">
+            <svg aria-hidden className="absolute inset-0 w-full h-full opacity-[0.045]">
+              <rect width="100%" height="100%" fill="url(#hero-arches)" />
+            </svg>
+          </div>
+
+          <div className="relative z-10">
+            {featured.map((tribute) => (
+              <div key={tribute.id} className="mtv-slot relative h-[88vh] flex items-center justify-center px-5">
+                <div className="mtv-card w-full max-w-[440px] rounded-[1.25rem] bg-parchment text-ink px-6 py-6 shadow-[0_24px_60px_rgba(0,0,0,0.45)] will-change-transform">
+                  <p className="serif-soft font-serif italic text-[1rem] leading-[1.6]">
+                    &ldquo;
+                    {Array.from(tribute.text).map((char, c) => (
+                      <span key={c} className="mtv-char">
+                        {char}
+                      </span>
+                    ))}
+                    &rdquo;
+                    <span className="mtv-caret inline-block w-[2px] h-[1em] bg-coral align-middle ml-0.5 animate-pulse opacity-0" />
+                  </p>
+                  <p className="mt-4 text-[0.75rem] font-semibold tracking-wide text-ink/60">
+                    {Array.from(`${tribute.name} · ${tribute.relation}`).map((char, c) => (
+                      <span key={c} className="mtv-author">
+                        {char}
+                      </span>
+                    ))}
+                  </p>
+                </div>
+              </div>
+            ))}
+
+            {/* the seal */}
+            <div className="mtv-sealwrap relative z-10 flex flex-col items-center gap-5 pb-20 pt-6 text-parchment">
+              <span className="relative">
+                <span className="mtv-sealring absolute inset-0 rounded-full border-2 border-coral opacity-0" aria-hidden />
+                <Link
+                  href={ROUTES.TRIBUTES}
+                  className="mtv-seal relative flex items-center justify-center w-[132px] aspect-square rounded-full bg-coral text-ink text-center px-4 shadow-[0_18px_44px_rgba(0,0,0,0.5)]"
+                >
+                  <span className="serif-soft font-serif italic text-[0.9375rem] leading-tight">
+                    {multiplicationWall.ctas.addTribute}
+                  </span>
+                </Link>
+              </span>
+              <Link
+                href={ROUTES.TRIBUTES}
+                className="mtv-readall text-[0.8125rem] font-semibold text-blush underline underline-offset-4"
+              >
+                {multiplicationWall.ctas.readAll}
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </section>

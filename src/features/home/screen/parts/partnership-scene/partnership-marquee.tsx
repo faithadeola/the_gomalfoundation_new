@@ -5,8 +5,10 @@ import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { motion } from "motion/react";
 import { contents } from "@contents";
 import { ROUTES } from "@shared/constants/routes";
+import { useTheatreMode } from "@shared/hooks/use-theatre-mode";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -20,11 +22,36 @@ const jig = (n: number, m: number) => ((n * 7919) % (2 * m + 1)) - m;
  */
 export function PartnershipMarquee() {
   const scope = useRef<HTMLElement>(null);
+  const theatre = useTheatreMode();
   const { partnership } = contents;
 
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
+
+      // mobile: a compact marquee band shears with the page scroll
+      mm.add("(max-width: 767.98px) and (prefers-reduced-motion: no-preference)", () => {
+        const stage = scope.current;
+        if (!stage) return;
+        gsap.fromTo(
+          ".mpm-row-a",
+          { xPercent: 4 },
+          {
+            xPercent: -42,
+            ease: "none",
+            scrollTrigger: { trigger: stage, start: "top bottom", end: "bottom top", scrub: 0.8 },
+          }
+        );
+        gsap.fromTo(
+          ".mpm-row-b",
+          { xPercent: -42 },
+          {
+            xPercent: 4,
+            ease: "none",
+            scrollTrigger: { trigger: stage, start: "top bottom", end: "bottom top", scrub: 0.8 },
+          }
+        );
+      });
 
       mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
         const stage = scope.current;
@@ -111,8 +138,34 @@ export function PartnershipMarquee() {
         </div>
       </div>
 
+      {/* mobile: compact marquee band, sheared by the page scroll */}
+      <div aria-hidden className="md:motion-safe:hidden motion-reduce:hidden overflow-hidden pt-12 -mb-4 select-none">
+        <div
+          className="mpm-row-a whitespace-nowrap font-display font-black uppercase text-parchment/90 text-[11vw] leading-[1]"
+          style={{ fontVariationSettings: "'wdth' 84" }}
+        >
+          {Array.from({ length: 4 }).map((_, i) => (
+            <span key={i}>{marqueeText.toUpperCase()}</span>
+          ))}
+        </div>
+        <div
+          className="mpm-row-b whitespace-nowrap font-display font-black uppercase text-blush/90 text-[11vw] leading-[1]"
+          style={{ fontVariationSettings: "'wdth' 84" }}
+        >
+          {Array.from({ length: 4 }).map((_, i) => (
+            <span key={i}>{marqueeText.toUpperCase()}</span>
+          ))}
+        </div>
+      </div>
+
       <div className="relative z-10 max-w-[1140px] mx-auto px-6 md:px-10 py-16 md:py-[2vw] md:h-full md:flex md:flex-col md:justify-center">
-        <div className="pm-head text-center md:motion-safe:opacity-0">
+        <motion.div
+          initial={theatre ? false : { y: 26, opacity: 0 }}
+          whileInView={theatre ? undefined : { y: 0, opacity: 1 }}
+          viewport={{ once: true, amount: 0.5 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="pm-head text-center md:motion-safe:opacity-0"
+        >
           <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-blush mb-3">
             {partnership.section.eyebrow}
           </p>
@@ -125,23 +178,32 @@ export function PartnershipMarquee() {
           <p className="serif-soft mt-3 font-serif italic text-sage text-[clamp(0.9375rem,1.5vw,1.25rem)] max-w-[52ch] mx-auto">
             {partnership.section.body}
           </p>
-        </div>
+        </motion.div>
 
-        {/* the seven tickets */}
+        {/* the seven tickets — raining in on mobile */}
         <div className="mt-10 md:mt-8 flex flex-wrap justify-center gap-3">
-          {partnership.focusPairs.map((pair) => (
-            <span
+          {partnership.focusPairs.map((pair, i) => (
+            <motion.span
               key={pair.type}
+              initial={theatre ? false : { y: -60, rotate: jig(i * 3 + 1, 16), opacity: 0 }}
+              whileInView={theatre ? undefined : { y: 0, rotate: jig(i, 3), opacity: 1 }}
+              viewport={{ once: true, amount: 0.5 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20, delay: i * 0.07 }}
               className="pm-chip inline-flex flex-col rounded-xl bg-parchment text-ink px-5 py-3 shadow-[0_12px_28px_rgba(4,26,21,0.35)] max-w-[240px]"
             >
               <span className="text-[0.8125rem] font-bold">{partnership.typeLabels[pair.type]}</span>
               <span className="text-[0.6875rem] text-ink/60 leading-snug mt-0.5">{pair.desc}</span>
-            </span>
+            </motion.span>
           ))}
         </div>
 
         {/* the application card */}
-        <div className="pm-card mt-10 md:mt-12 mx-auto w-full max-w-[560px] rounded-[1.5rem] bg-parchment text-ink px-8 py-7 text-center shadow-[0_24px_60px_rgba(4,26,21,0.4)] md:motion-safe:opacity-0">
+        <motion.div
+          initial={theatre ? false : { y: 40, opacity: 0 }}
+          whileInView={theatre ? undefined : { y: 0, opacity: 1 }}
+          viewport={{ once: true, amount: 0.4 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+          className="pm-card mt-10 md:mt-12 mx-auto w-full max-w-[560px] rounded-[1.5rem] bg-parchment text-ink px-8 py-7 text-center shadow-[0_24px_60px_rgba(4,26,21,0.4)] md:motion-safe:opacity-0">
           <h3 className="font-display font-bold text-[1.25rem] mb-1.5" style={{ fontVariationSettings: "'wdth' 88" }}>
             {partnership.section.card.heading}
           </h3>
@@ -153,7 +215,7 @@ export function PartnershipMarquee() {
             {partnership.section.card.cta}
           </Link>
           <p className="mt-3 text-[0.75rem] text-ink/50">{partnership.section.card.footnote}</p>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

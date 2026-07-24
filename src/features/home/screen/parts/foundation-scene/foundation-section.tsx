@@ -14,6 +14,21 @@ gsap.registerPlugin(ScrollTrigger);
 
 const ORB_ACCENTS = ["#f7c948", "#f6c0ae", "#e96d51", "#b9a3e3"] as const;
 
+const letterVariants = {
+  hidden: { y: "115%", rotate: 7, opacity: 0 },
+  visible: {
+    y: "0%",
+    rotate: 0,
+    opacity: 1,
+    transition: { type: "spring" as const, stiffness: 300, damping: 26 },
+  },
+};
+
+const cascade = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.035 } },
+};
+
 /**
  * Section 3 — The Foundation: "The Multiplication".
  * The disc arrives, pulses, and splits into four orbs that orbit it on a
@@ -36,6 +51,44 @@ export function FoundationSection() {
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
+
+      // mobile: the orbit, miniaturised — scrubbed by the section's own
+      // scroll, one revolution, then the orbs are absorbed back
+      mm.add("(max-width: 767.98px) and (prefers-reduced-motion: no-preference)", () => {
+        const stage = scope.current?.querySelector<HTMLElement>(".mfd-stage");
+        const disc = stage?.querySelector<HTMLElement>(".mfd-disc");
+        const orbs = gsap.utils.toArray<HTMLElement>(".mfd-orb");
+        if (!stage || !disc || orbs.length === 0) return;
+
+        const orbit = { t: 0.1, r: 0 };
+        const layout = () => {
+          const RX = stage.clientWidth * 0.36;
+          const RY = stage.clientHeight * 0.42;
+          orbs.forEach((orb, i) => {
+            const ang = (orbit.t + i / orbs.length) * Math.PI * 2;
+            const depth = (Math.sin(ang) + 1) / 2;
+            gsap.set(orb, {
+              x: Math.cos(ang) * RX * orbit.r,
+              y: Math.sin(ang) * RY * orbit.r,
+              scale: (0.6 + 0.4 * depth) * Math.min(1, orbit.r * 2 + 0.3),
+              zIndex: 20 + Math.round(depth * 20),
+              autoAlpha: orbit.r === 0 ? 0 : 0.6 + 0.4 * depth,
+            });
+          });
+        };
+
+        const mtl = gsap.timeline({
+          defaults: { ease: "none" },
+          scrollTrigger: { trigger: stage, start: "top 85%", end: "bottom 20%", scrub: 0.6 },
+        });
+        mtl.fromTo(disc, { scale: 0.5, rotation: -240 }, { scale: 1, rotation: 0, duration: 2, ease: "power1.out" }, 0);
+        mtl.to(orbit, { r: 1, duration: 1.4, ease: "power2.out", onUpdate: layout }, 0.8);
+        mtl.to(orbit, { t: 1.15, duration: 5.4, onUpdate: layout }, 0.8);
+        // absorbed back into the disc — the numbered sockets take over
+        mtl.to(orbit, { r: 0, duration: 1.2, ease: "power2.in", onUpdate: layout }, 6.4);
+        mtl.to(disc, { scale: 1.12, duration: 0.5 }, 7.2);
+        mtl.to(disc, { scale: 1, duration: 0.5 }, 7.7);
+      });
 
       mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
         const stage = scope.current;
@@ -228,28 +281,64 @@ export function FoundationSection() {
             {foundation.eyebrow}
           </motion.p>
 
-          <h2
+          <motion.h2
+            variants={theatre ? undefined : cascade}
+            initial={theatre ? false : "hidden"}
+            whileInView={theatre ? undefined : "visible"}
+            viewport={{ once: true, amount: 0.5 }}
             className="mt-8 md:mt-6 font-display font-black uppercase leading-[0.92] tracking-[-0.02em] text-[clamp(2.5rem,5.8vw,4.75rem)]"
             style={{ fontVariationSettings: "'wdth' 84" }}
           >
-            <FdCascade text={foundation.heading.line1} />
+            <FdCascade text={foundation.heading.line1} theatre={theatre} />
             <span className="block text-blush">
-              <FdCascade text={foundation.heading.highlighted} inline />
+              <FdCascade text={foundation.heading.highlighted} theatre={theatre} inline />
             </span>
-          </h2>
+          </motion.h2>
 
-          <p className="fd-intro mt-6 text-[clamp(0.9375rem,1.3vw,1.0625rem)] leading-[1.65] text-parchment/75 max-w-[52ch]">
+          <motion.p
+            initial={theatre ? false : { y: 20, opacity: 0 }}
+            whileInView={theatre ? undefined : { y: 0, opacity: 1 }}
+            viewport={{ once: true, amount: 0.6 }}
+            transition={{ delay: 0.25, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="fd-intro mt-6 text-[clamp(0.9375rem,1.3vw,1.0625rem)] leading-[1.65] text-parchment/75 max-w-[52ch]"
+          >
             {foundation.intro}
-          </p>
+          </motion.p>
 
           {/* pull quote — words revealed one by one in theatre */}
-          <p className="serif-soft mt-6 md:mt-5 font-serif italic text-[clamp(1rem,1.5vw,1.25rem)] text-sage leading-[1.55] max-w-[48ch]">
+          <motion.p
+            initial={theatre ? false : { y: 18, opacity: 0 }}
+            whileInView={theatre ? undefined : { y: 0, opacity: 1 }}
+            viewport={{ once: true, amount: 0.6 }}
+            transition={{ delay: 0.4, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="serif-soft mt-6 md:mt-5 font-serif italic text-[clamp(1rem,1.5vw,1.25rem)] text-sage leading-[1.55] max-w-[48ch]"
+          >
             {foundation.pullQuote.split(" ").map((word, w) => (
               <span key={w} className="fd-word inline-block mr-[0.3em]">
                 {word}
               </span>
             ))}
-          </p>
+          </motion.p>
+        </div>
+
+        {/* mobile: the orbit, miniaturised — the disc grows and the four
+            orbs run one revolution as you scroll past */}
+        <div className="mfd-stage md:motion-safe:hidden relative h-[34vh] my-6">
+          <div className="mfd-disc absolute left-1/2 top-1/2 -ml-12 -mt-12 w-24 aspect-square">
+            <div className="w-full h-full rounded-full overflow-hidden border-4 border-blush/60 bg-evergreen-deep relative">
+              <Image src={contents.hero.images.together} alt="" fill sizes="96px" className="object-cover" />
+            </div>
+          </div>
+          {foundation.focusAreas.map((area, i) => (
+            <div key={area.num} className="mfd-orb absolute left-1/2 top-1/2 -ml-6 -mt-6 w-12 aspect-square opacity-0">
+              <div
+                className="w-full h-full rounded-full flex items-center justify-center border-2 border-evergreen-deep shadow-[0_8px_18px_rgba(4,26,21,0.45)]"
+                style={{ background: ORB_ACCENTS[i % ORB_ACCENTS.length] }}
+              >
+                <span className="font-display font-black text-ink text-sm">{area.num}</span>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* the orbit theatre — parent disc + four orbs (desktop) */}
@@ -291,12 +380,16 @@ export function FoundationSection() {
                 data-fd-socket={i}
                 className="absolute -top-7 left-6 w-14 aspect-square rounded-full border-2 border-dashed border-parchment/70 md:border-blush/70"
               >
-                <span
+                <motion.span
+                  initial={theatre ? false : { scale: 0, rotate: -30 }}
+                  whileInView={theatre ? undefined : { scale: 1, rotate: 0 }}
+                  viewport={{ once: true, amount: 0.8 }}
+                  transition={{ type: "spring", stiffness: 320, damping: 18, delay: 0.25 + i * 0.08 }}
                   className="md:motion-safe:hidden absolute inset-1 rounded-full flex items-center justify-center font-display font-black text-ink text-sm"
                   style={{ background: ORB_ACCENTS[i % ORB_ACCENTS.length] }}
                 >
                   {area.num}
-                </span>
+                </motion.span>
               </div>
               <div
                 data-fd-dust={i}
@@ -321,21 +414,22 @@ export function FoundationSection() {
 
 interface FdCascadeProps {
   readonly text: string;
+  readonly theatre: boolean;
   readonly inline?: boolean;
 }
 
-function FdCascade({ text, inline }: FdCascadeProps) {
+function FdCascade({ text, theatre, inline }: FdCascadeProps) {
   return (
     <span className={inline ? "inline" : "block"}>
       {text.split(" ").map((word, w) => (
         <span key={w} className="inline-block whitespace-nowrap mr-[0.22em] last:mr-0">
           {Array.from(word).map((letter, i) => (
             <span key={i} className="fd-slot inline-block overflow-hidden pb-[0.06em] -mb-[0.06em] align-bottom">
-              <span className="fd-rise inline-block">
+              <motion.span variants={theatre ? undefined : letterVariants} className="fd-rise inline-block">
                 <span className="fd-letter inline-block cursor-default transition-colors duration-300 hover:text-marigold">
                   {letter}
                 </span>
-              </span>
+              </motion.span>
             </span>
           ))}
         </span>

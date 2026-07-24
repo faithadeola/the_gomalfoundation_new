@@ -11,12 +11,14 @@ import { ConferenceSection } from "./parts/conference-scene/conference-section";
 import { PartnershipMarquee } from "./parts/partnership-scene/partnership-marquee";
 import { SiteFooter } from "./parts/footer/site-footer";
 import { SectionHashSync } from "./parts/section-hash-sync";
+import { BackToTop } from "./parts/back-to-top";
 
 export function HomeScreen() {
   return (
     <SplashProvider>
       <SplashScreen />
       <SectionHashSync />
+      <BackToTop />
       <SiteNav />
       <main>
         <StoryStage />

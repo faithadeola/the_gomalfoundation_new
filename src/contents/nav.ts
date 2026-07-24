@@ -15,6 +15,7 @@ export const navContents = {
     giveCtaFull: "Give to the Foundation",
     openMenuLabel: "Open menu",
     closeMenuLabel: "Close menu",
+    backToTopLabel: "Back to top",
     mobileNavLabel: "Mobile navigation",
     mainNavLabel: "Main navigation",
   },

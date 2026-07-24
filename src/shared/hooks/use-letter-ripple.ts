@@ -82,10 +82,21 @@ export function useLetterRipple(
       if (!frame) frame = requestAnimationFrame(update);
     };
 
+    // a finger is an insect on the water too
+    const onTouch = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      if (!touch) return;
+      mouseX = touch.clientX + window.scrollX;
+      mouseY = touch.clientY + window.scrollY;
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+
     window.addEventListener("mousemove", onMove);
+    window.addEventListener("touchmove", onTouch, { passive: true });
 
     return () => {
       window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("touchmove", onTouch);
       window.removeEventListener("resize", measure);
       if (frame) cancelAnimationFrame(frame);
       gsap.killTweensOf(letters);

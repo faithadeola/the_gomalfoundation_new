@@ -12,6 +12,33 @@ gsap.registerPlugin(ScrollTrigger);
 /** Rows per odometer strip: 0–9 then 0 again for a seamless wrap. */
 const STRIP_ROWS = 11;
 
+/** Gear a set of digit strips to one value — the true odometer. */
+function makeOdometer(strips: HTMLElement[], target: number) {
+  const value = { v: 0 };
+  const layout = () => {
+    strips.forEach((strip) => {
+      const place = Number(strip.dataset.place ?? "0");
+      const p = (value.v / Math.pow(10, place)) % 10;
+      gsap.set(strip, { yPercent: -(p * 100) / STRIP_ROWS });
+    });
+  };
+  layout();
+  let tween: gsap.core.Tween | null = null;
+  return {
+    play: () => {
+      tween?.kill();
+      value.v = 0;
+      layout();
+      tween = gsap.to(value, { v: target, duration: 3, ease: "power2.out", onUpdate: layout });
+    },
+    reset: () => {
+      tween?.kill();
+      value.v = 0;
+      layout();
+    },
+  };
+}
+
 /**
  * The word arrives in three pieces, each carrying a portrait like a
  * water droplet: GO (Baba clinging on top) from the top-left, MA
@@ -61,20 +88,50 @@ export function WordmarkSection() {
     () => {
       const mm = gsap.matchMedia();
 
-      // mobile: simple count-up
+      // mobile: the same performance, timed on arrival — segments
+      // converge, droplets detach, curtain draws, the odometer counts
       mm.add("(max-width: 767.98px) and (prefers-reduced-motion: no-preference)", () => {
-        const el = scope.current?.querySelector<HTMLElement>(".wm2-mobile-count");
-        if (!el) return;
-        const counter = { v: 0 };
-        gsap.to(counter, {
-          v: target,
-          duration: 2,
-          ease: "power3.out",
-          scrollTrigger: { trigger: el, start: "top 85%", once: true },
-          onUpdate: () => {
-            el.textContent = String(Math.round(counter.v));
+        const stage = scope.current;
+        if (!stage) return;
+
+        const strips = gsap.utils.toArray<HTMLElement>(".mwm-strip");
+        const odometer = makeOdometer(strips, target);
+
+        const tl = gsap.timeline({
+          paused: true,
+          defaults: { ease: "power3.out" },
+          scrollTrigger: {
+            trigger: stage,
+            start: "top 65%",
+            toggleActions: "play none none none",
           },
         });
+
+        const arrivals = [
+          { x: "-70vw", y: "-30vh", rotation: -260 },
+          { x: "0vw", y: "40vh", rotation: 200 },
+          { x: "70vw", y: "-30vh", rotation: 260 },
+        ];
+        gsap.utils.toArray<HTMLElement>(".mwm-seg").forEach((seg, i) => {
+          tl.fromTo(
+            seg,
+            { ...arrivals[i % arrivals.length], autoAlpha: 0 },
+            { x: 0, y: 0, rotation: 0, autoAlpha: 1, duration: 0.9, ease: "power2.out" },
+            i * 0.25
+          );
+        });
+        // droplets let go
+        tl.to(".mwm-disc-up", { y: -120, autoAlpha: 0, rotation: 120, duration: 0.7, ease: "power2.in" }, 1.4);
+        tl.to(".mwm-disc-down", { y: 120, autoAlpha: 0, rotation: -120, duration: 0.7, ease: "power2.in" }, 1.55);
+        // the curtain draws off, then the count runs
+        tl.to(".mwm-curtain", {
+          xPercent: -101,
+          duration: 0.9,
+          ease: "power3.inOut",
+          onComplete: () => odometer.play(),
+          onReverseComplete: () => odometer.reset(),
+        }, 2.1);
+        tl.fromTo(".mwm-cap", { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, stagger: 0.12, duration: 0.6 }, 3);
       });
 
       mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
@@ -83,34 +140,7 @@ export function WordmarkSection() {
 
         const segs = gsap.utils.toArray<HTMLElement>(".wm3-seg");
         const strips = gsap.utils.toArray<HTMLElement>(".wm3-strip");
-
-        // ── the true odometer: one value, every wheel geared to it
-        const value = { v: 0 };
-        const layoutDigits = () => {
-          strips.forEach((strip) => {
-            const place = Number(strip.dataset.place ?? "0");
-            const p = (value.v / Math.pow(10, place)) % 10;
-            gsap.set(strip, { yPercent: -(p * 100) / STRIP_ROWS });
-          });
-        };
-        layoutDigits();
-        let countTween: gsap.core.Tween | null = null;
-        const playCount = () => {
-          countTween?.kill();
-          value.v = 0;
-          layoutDigits();
-          countTween = gsap.to(value, {
-            v: target,
-            duration: 3,
-            ease: "power2.out",
-            onUpdate: layoutDigits,
-          });
-        };
-        const resetCount = () => {
-          countTween?.kill();
-          value.v = 0;
-          layoutDigits();
-        };
+        const odometer = makeOdometer(strips, target);
 
         const tl = gsap.timeline({
           defaults: { ease: "none" },
@@ -165,8 +195,8 @@ export function WordmarkSection() {
         tl.call(
           () => {
             const st = tl.scrollTrigger;
-            if (st && st.direction < 0) resetCount();
-            else playCount();
+            if (st && st.direction < 0) odometer.reset();
+            else odometer.play();
           },
           [],
           12
@@ -296,24 +326,89 @@ export function WordmarkSection() {
         </div>
       </div>
 
-      {/* ───────── flowing fallback (mobile / reduced motion) ───────── */}
-      <div className="md:motion-safe:hidden relative z-10 max-w-[720px] mx-auto px-6 py-20 text-center">
-        <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-coral mb-6">
+      {/* ───────── mobile — the same performance, in flow ───────── */}
+      <div className="md:motion-safe:hidden relative z-10 max-w-[720px] mx-auto px-6 py-20 text-center overflow-hidden">
+        <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-coral mb-8">
           {multiplicationWall.eyebrow}
         </p>
+
+        {/* GO / MA / L with their droplets */}
+        <div className="motion-safe:block motion-reduce:hidden relative flex items-center justify-center gap-[2vw] mb-12">
+          {SEGMENTS.map((segment) => (
+            <div key={segment.text} className="mwm-seg relative opacity-0 will-change-transform">
+              <span
+                className="block font-display font-black text-evergreen-deep text-[19vw] leading-none"
+                style={{ fontVariationSettings: "'wdth' 84" }}
+              >
+                {segment.text}
+              </span>
+              <span
+                className={`absolute left-1/2 -translate-x-1/2 ${
+                  segment.discSide === "top" ? "-top-[8vw]" : "-bottom-[8vw]"
+                }`}
+              >
+                <span
+                  className={`${
+                    segment.discSide === "top" ? "mwm-disc-up" : "mwm-disc-down"
+                  } block w-[11vw] aspect-square rounded-full overflow-hidden border-[0.6vw] border-blush bg-evergreen relative`}
+                >
+                  <Image src={portraitSrc[segment.disc]} alt="" fill sizes="12vw" className="object-cover" />
+                </span>
+              </span>
+            </div>
+          ))}
+        </div>
+        {/* reduced motion: the word, plainly */}
         <p
-          className="wm2-mobile-count font-display font-black text-coral text-[clamp(4.5rem,20vw,8rem)] leading-none"
+          className="motion-reduce:block hidden font-display font-black text-evergreen-deep text-[19vw] leading-none mb-10"
+          style={{ fontVariationSettings: "'wdth' 84" }}
+        >
+          {contents.hero.watermark}
+        </p>
+
+        {/* reduced motion: the number, plainly */}
+        <p
+          className="motion-reduce:block hidden font-display font-black text-coral text-[clamp(4rem,18vw,7rem)] leading-none mb-8"
           style={{ fontVariationSettings: "'wdth' 84" }}
         >
           {String(target)}
         </p>
+
+        {/* the drums under their curtain */}
+        <div className="motion-reduce:hidden relative inline-block overflow-hidden rounded-[1.2vh] mb-8">
+          <div className="flex items-center justify-center gap-[1.4vw]">
+            {digitChars.map((_, i) => {
+              const place = digitChars.length - 1 - i;
+              return (
+                <span
+                  key={i}
+                  className="relative block h-[11vh] w-[8.5vw] min-w-[52px] overflow-hidden rounded-[1vh] bg-evergreen-deep shadow-[inset_0_8px_14px_rgba(4,26,21,0.6),inset_0_-8px_14px_rgba(4,26,21,0.6)]"
+                >
+                  <span className="mwm-strip block" data-place={place}>
+                    {Array.from({ length: STRIP_ROWS }, (_, r) => (r === 10 ? 0 : r)).map((d, r) => (
+                      <span
+                        key={r}
+                        className="flex h-[11vh] items-center justify-center font-display font-black text-marigold text-[6.5vh] leading-none"
+                      >
+                        {d}
+                      </span>
+                    ))}
+                  </span>
+                </span>
+              );
+            })}
+          </div>
+          {/* green curtain over the drums */}
+          <div className="mwm-curtain motion-reduce:hidden absolute inset-0 bg-evergreen-deep rounded-[1.2vh]" />
+        </div>
+
         <p
-          className="mt-3 font-display font-black uppercase text-ink text-[clamp(1.5rem,6vw,2.25rem)] leading-[1.1]"
+          className="mwm-cap font-display font-black uppercase text-ink text-[clamp(1.5rem,6vw,2.25rem)] leading-[1.1]"
           style={{ fontVariationSettings: "'wdth' 84" }}
         >
           {multiplicationWall.headingAfterCounter}
         </p>
-        <p className="serif-soft mt-4 font-serif italic text-ink/60 text-[1.0625rem]">
+        <p className="mwm-cap serif-soft mt-4 font-serif italic text-ink/60 text-[1.0625rem]">
           {multiplicationWall.subheading}
         </p>
       </div>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { contents } from "@contents";
 import { ROUTES } from "@shared/constants/routes";
 import { LogoMark } from "@ui/components/logo/logo-mark";
+import { Rise } from "@ui/components/reveal/rise";
 
 /**
  * The footer — the site closes the way it opened: with the wordmark.
@@ -18,13 +19,14 @@ export function SiteFooter() {
       <div className="relative z-10 max-w-[1240px] mx-auto px-6 md:px-10 pt-16 md:pt-20 pb-8">
         {/* top — blurb + link columns */}
         <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr_1fr] gap-10 md:gap-14 pb-14 border-b border-parchment/10">
-          <div>
+          <Rise>
             <LogoMark className="text-coral mb-5" />
             <p className="serif-soft font-serif italic text-[1rem] leading-[1.6] text-parchment/75 max-w-[38ch]">
               {footer.blurb}
             </p>
             <p className="mt-4 text-[0.8125rem] text-parchment/50">{site.address.full}</p>
-          </div>
+          </Rise>
+          <Rise delay={0.12}>
           <nav aria-label={footer.foundationHeading}>
             <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-blush mb-4">
               {footer.foundationHeading}
@@ -42,6 +44,8 @@ export function SiteFooter() {
               ))}
             </ul>
           </nav>
+          </Rise>
+          <Rise delay={0.24}>
           <nav aria-label={footer.getInvolvedHeading}>
             <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-blush mb-4">
               {footer.getInvolvedHeading}
@@ -65,6 +69,7 @@ export function SiteFooter() {
               {footer.giveCta}
             </Link>
           </nav>
+          </Rise>
         </div>
 
         {/* legal */}

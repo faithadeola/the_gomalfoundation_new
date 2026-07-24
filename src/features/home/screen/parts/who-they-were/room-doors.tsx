@@ -26,25 +26,31 @@ export function RoomDoors() {
       });
 
       mm.add("(max-width: 767.98px) and (prefers-reduced-motion: no-preference)", () => {
-        const doors = gsap.utils.toArray<HTMLElement>(".room-door");
-        const interiors = gsap.utils.toArray<HTMLElement>(".room-interior");
-
-        gsap.set(interiors, { autoAlpha: 0 });
-
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: scope.current,
-            start: "top 74%",
-            once: true,
-          },
-        });
-
-        doors.forEach((door, i) => {
-          const at = i * 0.17;
-          // swing past, creak back — a door pushed open by hand
-          tl.to(door, { rotateY: -112, duration: 0.85, ease: "power3.in" }, at);
-          tl.to(door, { rotateY: -102, duration: 0.45, ease: "power2.out" }, at + 0.85);
-          tl.to(interiors[i], { autoAlpha: 1, duration: 0.5, ease: "power1.out" }, at + 0.55);
+        // your scroll is the handle — each door opens as it crosses the
+        // viewport, and closes again if you scroll back
+        gsap.utils.toArray<HTMLElement>(".room-door").forEach((door) => {
+          const article = door.closest("article") ?? door;
+          const interior = article.querySelector(".room-interior");
+          gsap.fromTo(
+            door,
+            { rotateY: 0 },
+            {
+              rotateY: -108,
+              ease: "none",
+              scrollTrigger: { trigger: article, start: "top 80%", end: "top 34%", scrub: 0.5 },
+            }
+          );
+          if (interior) {
+            gsap.fromTo(
+              interior,
+              { autoAlpha: 0.1 },
+              {
+                autoAlpha: 1,
+                ease: "none",
+                scrollTrigger: { trigger: article, start: "top 72%", end: "top 40%", scrub: 0.5 },
+              }
+            );
+          }
         });
       });
     },
