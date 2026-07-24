@@ -89,6 +89,7 @@ export function PartnershipMarquee() {
 
   return (
     <section
+      id="partner"
       ref={scope}
       className="texture-grain relative overflow-hidden bg-evergreen text-parchment md:motion-safe:h-svh"
     >
@@ -110,7 +111,7 @@ export function PartnershipMarquee() {
         </div>
       </div>
 
-      <div className="relative z-10 max-w-[1140px] mx-auto px-6 md:px-10 py-16 md:py-[3vw] md:h-full md:flex md:flex-col">
+      <div className="relative z-10 max-w-[1140px] mx-auto px-6 md:px-10 py-16 md:py-[2vw] md:h-full md:flex md:flex-col md:justify-center">
         <div className="pm-head text-center md:motion-safe:opacity-0">
           <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-blush mb-3">
             {partnership.section.eyebrow}
@@ -140,7 +141,7 @@ export function PartnershipMarquee() {
         </div>
 
         {/* the application card */}
-        <div className="pm-card mt-10 md:mt-auto mx-auto w-full max-w-[560px] rounded-[1.5rem] bg-parchment text-ink px-8 py-7 text-center shadow-[0_24px_60px_rgba(4,26,21,0.4)] md:motion-safe:opacity-0">
+        <div className="pm-card mt-10 md:mt-12 mx-auto w-full max-w-[560px] rounded-[1.5rem] bg-parchment text-ink px-8 py-7 text-center shadow-[0_24px_60px_rgba(4,26,21,0.4)] md:motion-safe:opacity-0">
           <h3 className="font-display font-bold text-[1.25rem] mb-1.5" style={{ fontVariationSettings: "'wdth' 88" }}>
             {partnership.section.card.heading}
           </h3>

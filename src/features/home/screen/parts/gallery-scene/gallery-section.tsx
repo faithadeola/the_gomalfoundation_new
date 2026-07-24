@@ -1,13 +1,19 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { AnimatePresence, motion } from "motion/react";
 import { contents } from "@contents";
 
 gsap.registerPlugin(ScrollTrigger);
+
+interface LightboxImage {
+  readonly src: string;
+  readonly alt: string;
+}
 
 /** Photos per strip; the 12 gallery images are dealt across three rows. */
 const ROWS = 3;
@@ -26,6 +32,22 @@ const CENTER_SCALE = 0.24;
 export function GallerySection() {
   const scope = useRef<HTMLElement>(null);
   const { gallery } = contents;
+  const [lightbox, setLightbox] = useState<LightboxImage | null>(null);
+
+  // Escape closes; page scroll locks while the lightbox is open
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightbox(null);
+    };
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [lightbox]);
 
   // deal the images across three strips, doubled for length
   const strips = Array.from({ length: ROWS }, (_, r) => {
@@ -121,6 +143,7 @@ export function GallerySection() {
 
   return (
     <section
+      id="gallery"
       ref={scope}
       className="texture-grain relative overflow-hidden bg-evergreen text-parchment md:motion-safe:h-svh"
     >
@@ -162,13 +185,18 @@ export function GallerySection() {
               />
               <div className="ga-row flex gap-[1.2vw] w-max">
                 {strip.map((image, i) => (
-                  <div key={`${image.src}-${i}`} className="ga-photo shrink-0 w-[19vw] will-change-transform">
+                  <button
+                    key={`${image.src}-${i}`}
+                    type="button"
+                    onClick={() => setLightbox(image)}
+                    className="ga-photo shrink-0 w-[19vw] will-change-transform cursor-zoom-in"
+                  >
                     <div className="bg-parchment p-[0.4vw] pb-[1.4vh] rounded-sm shadow-[0_14px_36px_rgba(4,26,21,0.5)]">
                       <div className="relative aspect-[4/3] overflow-hidden">
                         <Image src={image.src} alt={image.alt} fill sizes="19vw" className="object-cover" />
                       </div>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
               <div
@@ -186,7 +214,11 @@ export function GallerySection() {
 
         {/* centrepiece */}
         <div className="absolute left-1/2 top-1/2">
-          <div className="ga-center absolute z-50 -ml-[17vw] -mt-[21vh] w-[34vw] opacity-0">
+          <button
+            type="button"
+            onClick={() => setLightbox(gallery.centerpiece)}
+            className="ga-center absolute z-50 -ml-[17vw] -mt-[21vh] w-[34vw] opacity-0 cursor-zoom-in text-left"
+          >
             <div className="bg-parchment p-[0.7vw] pb-[3.2vh] rounded-sm shadow-[0_36px_90px_rgba(4,26,21,0.65)]">
               <div className="relative aspect-[4/3] overflow-hidden">
                 <Image
@@ -201,7 +233,7 @@ export function GallerySection() {
                 {gallery.centerpiece.caption}
               </p>
             </div>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -220,24 +252,75 @@ export function GallerySection() {
           {strips.map((strip, r) => (
             <div key={r} className="overflow-x-auto snap-x snap-mandatory flex gap-3 px-6 pb-2">
               {strip.slice(0, 8).map((image, i) => (
-                <div key={`${image.src}-${i}`} className="snap-center shrink-0 w-[68vw] bg-parchment p-2 pb-4 rounded-sm">
+                <button
+                  key={`${image.src}-${i}`}
+                  type="button"
+                  onClick={() => setLightbox(image)}
+                  className="snap-center shrink-0 w-[68vw] bg-parchment p-2 pb-4 rounded-sm cursor-zoom-in"
+                >
                   <div className="relative aspect-[4/3]">
                     <Image src={image.src} alt={image.alt} fill sizes="68vw" className="object-cover" />
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           ))}
         </div>
-        <div className="mt-8 px-6 max-w-[420px] mx-auto bg-parchment p-2 pb-6 rounded-sm relative">
+        <button
+          type="button"
+          onClick={() => setLightbox(gallery.centerpiece)}
+          className="block mt-8 mx-6 max-w-[420px] sm:mx-auto bg-parchment p-2 pb-6 rounded-sm relative cursor-zoom-in text-left"
+        >
           <div className="relative aspect-[4/3]">
             <Image src={gallery.centerpiece.src} alt={gallery.centerpiece.alt} fill sizes="90vw" className="object-cover" />
           </div>
           <p className="serif-soft absolute bottom-1 inset-x-0 text-center font-serif italic text-ink text-[0.75rem]">
             {gallery.centerpiece.caption}
           </p>
-        </div>
+        </button>
       </div>
+
+      {/* ───────── the lightbox ───────── */}
+      <AnimatePresence>
+        {lightbox ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            onClick={() => setLightbox(null)}
+            className="fixed inset-0 z-[95] bg-ink/90 flex items-center justify-center p-5 md:p-10"
+          >
+            <motion.div
+              initial={{ scale: 0.72, rotate: -1.5 }}
+              animate={{ scale: 1, rotate: 0 }}
+              exit={{ scale: 0.82, rotate: 1 }}
+              transition={{ type: "spring", stiffness: 260, damping: 26 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full h-full max-w-[1280px]"
+            >
+              <Image
+                src={lightbox.src}
+                alt={lightbox.alt}
+                fill
+                sizes="100vw"
+                className="object-contain"
+                priority
+              />
+            </motion.div>
+            <button
+              type="button"
+              aria-label={gallery.lightboxCloseLabel}
+              onClick={() => setLightbox(null)}
+              className="absolute top-5 right-5 md:top-8 md:right-8 w-11 h-11 rounded-full bg-parchment text-ink flex items-center justify-center hover:bg-marigold hover:rotate-90 transition-all duration-300"
+            >
+              <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+                <path d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </section>
   );
 }

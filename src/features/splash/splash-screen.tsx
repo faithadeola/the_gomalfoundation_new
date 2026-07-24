@@ -109,6 +109,13 @@ function SplashPerformance() {
             return;
           }
 
+          // deep link / refresh onto a section: skip the performance so
+          // the hash-resume can land the visitor immediately
+          if (window.location.hash.length > 1) {
+            finish(0);
+            return;
+          }
+
           const disc = discRef.current;
           const panels = gsap.utils.toArray<HTMLElement>(".sp-panel");
           if (!disc || panels.length === 0) {

@@ -13,7 +13,7 @@ export function HeroSection() {
   // horizontally, while the medallion is free to travel vertically
   // across the section boundary during the story handoff
   return (
-    <section className="texture-grain relative min-h-[100svh] overflow-x-clip bg-evergreen flex items-center">
+    <section id="top" className="texture-grain relative min-h-[100svh] overflow-x-clip bg-evergreen flex items-center">
       {/* faint geometric pattern, Ahadi-style architecture */}
       <svg aria-hidden className="absolute inset-0 z-0 w-full h-full opacity-[0.045]">
         <defs>

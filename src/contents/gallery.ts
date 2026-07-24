@@ -3,6 +3,7 @@ export const galleryContents = {
     eyebrow: "The album",
     heading: "Moments from the work.",
     subheading: "GROWTHLAB, the classroom, the church — the life they lived, in frames.",
+    lightboxCloseLabel: "Close",
     centerpiece: {
       src: "/images/portraits/baba-mama-worship.jpg",
       alt: "Revd. Gabriel and Mrs. Margaret Lasehinde — Baba and Mama GOMAL in worship",

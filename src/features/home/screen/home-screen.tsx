@@ -10,11 +10,13 @@ import { GallerySection } from "./parts/gallery-scene/gallery-section";
 import { ConferenceSection } from "./parts/conference-scene/conference-section";
 import { PartnershipMarquee } from "./parts/partnership-scene/partnership-marquee";
 import { SiteFooter } from "./parts/footer/site-footer";
+import { SectionHashSync } from "./parts/section-hash-sync";
 
 export function HomeScreen() {
   return (
     <SplashProvider>
       <SplashScreen />
+      <SectionHashSync />
       <SiteNav />
       <main>
         <StoryStage />

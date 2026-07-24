@@ -97,6 +97,7 @@ export function ConferenceSection() {
 
   return (
     <section
+      id="conference"
       ref={scope}
       className="texture-grain relative overflow-hidden bg-evergreen-deep text-parchment md:motion-safe:h-svh"
     >

@@ -4,7 +4,7 @@ export const splashContents = {
      * Master switch — flip to false while working to skip the whole
      * performance (saves you the full durationMs on every reload).
      */
-    enabled: false,
+    enabled: true,
     /**
      * Total budget for the entire splash, title-reveal to disc-landing.
      * Every phase is a fraction of this, so one number rescales the

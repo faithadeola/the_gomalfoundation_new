@@ -190,6 +190,7 @@ export function WordmarkSection() {
 
   return (
     <section
+      id="legacy"
       ref={scope}
       className="texture-grain relative overflow-hidden bg-parchment text-ink md:motion-safe:h-svh"
     >

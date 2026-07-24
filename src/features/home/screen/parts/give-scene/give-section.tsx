@@ -85,6 +85,7 @@ export function GiveSection() {
 
   return (
     <section
+      id="give"
       ref={scope}
       className="texture-grain relative overflow-hidden bg-parchment text-ink"
     >
