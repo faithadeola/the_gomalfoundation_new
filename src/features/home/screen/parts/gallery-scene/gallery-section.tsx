@@ -7,7 +7,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { AnimatePresence, motion } from "motion/react";
 import { contents } from "@contents";
-import { Rise } from "@ui/components/reveal/rise";
 
 gsap.registerPlugin(ScrollTrigger);
 

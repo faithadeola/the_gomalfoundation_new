@@ -11,6 +11,9 @@ import { WhoTheyWereSection } from "../who-they-were/who-they-were-section";
 import { DoorTheatre } from "./door-theatre";
 
 gsap.registerPlugin(ScrollTrigger);
+// mobile browsers resize the viewport as the address bar hides/shows —
+// don't let that re-layout the pinned scenes mid-scroll
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 /** Stage tints per room — hex because GSAP tweens resolved colors. */
 const ROOM_TINTS = ["#f7c948", "#f6c0ae", "#e96d51", "#b9a3e3"] as const;
