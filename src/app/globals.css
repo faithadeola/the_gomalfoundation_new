@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+   GOMAL v2 design tokens
+   Deep evergreen + parchment poles, hot accent shots.
+   Fonts arrive as CSS variables from next/font (see layout.tsx).
+   ───────────────────────────────────────────────────────────── */
+@theme {
+  /* poles */
+  --color-evergreen: #0d4a3e;
+  --color-evergreen-deep: #093b31;
+  --color-evergreen-soft: #14594a;
+  --color-parchment: #fbefe2;
+  --color-parchment-deep: #f3e2cd;
+
+  /* accent shots */
+  --color-blush: #f6c0ae;
+  --color-sage: #8da692;
+  --color-coral: #e96d51;
+  --color-coral-deep: #d5573b;
+  --color-marigold: #f7c948;
+  --color-lilac: #b9a3e3;
+  --color-olive: #97883b;
+  --color-burnt: #e2703a;
+  --color-ink: #12302a;
+
+  /* type voices */
+  --font-display: var(--font-bricolage), "Arial Black", sans-serif;
+  --font-serif: var(--font-fraunces), Georgia, serif;
+  --font-body: var(--font-outfit), "Helvetica Neue", sans-serif;
+
+  /* motion */
+  --ease-snap: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+}
+
+::selection {
+  background: var(--color-marigold);
+  color: var(--color-ink);
+}
+
+/* Fraunces at its softest, wonkiest — the memorial voice */
+.serif-soft {
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+}
+
+/* film-grain overlay, sits on top of section surfaces.
+   z-25: above section content, below cross-section layers
+   (story card z-30, medallion z-40, door theatre z-45). */
+.texture-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 25;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* slow spin for the circular scroll badge */
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin-slow {
+  animation: spin-slow 18s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin-slow {
+    animation: none;
+  }
+}
