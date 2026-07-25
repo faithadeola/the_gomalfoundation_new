@@ -26,29 +26,35 @@ export function RoomDoors() {
       });
 
       mm.add("(max-width: 767.98px) and (prefers-reduced-motion: no-preference)", () => {
-        // your scroll is the handle — each door opens as it crosses the
-        // viewport, and closes again if you scroll back
+        // each door owns a full viewport and snaps to centre — the scroll
+        // is the handle: fully open exactly when the slot is centred
         gsap.utils.toArray<HTMLElement>(".room-door").forEach((door) => {
           const article = door.closest("article") ?? door;
           const interior = article.querySelector(".room-interior");
-          gsap.fromTo(
+          // opening is reserved for the centre — a timed swing that
+          // plays the moment the door's centre crosses the middle band,
+          // and reverses when it leaves in either direction
+          const swing = gsap.timeline({
+            paused: true,
+            scrollTrigger: {
+              trigger: article,
+              start: "center 65%",
+              end: "center 22%",
+              toggleActions: "play reverse play reverse",
+            },
+          });
+          swing.fromTo(
             door,
             { rotateY: 0 },
-            {
-              rotateY: -108,
-              ease: "none",
-              scrollTrigger: { trigger: article, start: "top 80%", end: "top 34%", scrub: 0.5 },
-            }
+            { rotateY: -108, duration: 0.9, ease: "power3.inOut" },
+            0
           );
           if (interior) {
-            gsap.fromTo(
+            swing.fromTo(
               interior,
               { autoAlpha: 0.1 },
-              {
-                autoAlpha: 1,
-                ease: "none",
-                scrollTrigger: { trigger: article, start: "top 72%", end: "top 40%", scrub: 0.5 },
-              }
+              { autoAlpha: 1, duration: 0.6, ease: "power1.out" },
+              0.25
             );
           }
         });
@@ -65,8 +71,11 @@ export function RoomDoors() {
       {contents.whoTheyWere.rooms.map((room) => {
         const Icon = ROOM_ICONS[room.icon as RoomIconName];
         return (
-          <article key={room.eyebrow} className="relative [perspective:1500px] group">
-            <div className="relative rounded-t-full min-h-[400px] [transform-style:preserve-3d]">
+          <article
+            key={room.eyebrow}
+            className="relative [perspective:1500px] group max-md:motion-safe:snap-center"
+          >
+            <div className="relative rounded-t-full min-h-[400px] [transform-style:preserve-3d] w-full max-md:motion-safe:w-[82vw] max-md:motion-safe:max-w-[400px] max-md:motion-safe:mx-auto">
               {/* the room behind the door */}
               <div className="room-interior absolute inset-0 rounded-t-full bg-evergreen-deep overflow-hidden flex flex-col items-center text-center px-7 pt-20 pb-9 transition-transform duration-300 group-hover:-translate-y-1.5">
                 <Icon className="w-9 h-9 text-marigold mb-6" />

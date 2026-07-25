@@ -17,5 +17,13 @@ export const footerContents = {
     getInvolvedHeading: "Get Involved",
     giveCta: "Give to the Foundation",
     copyright: "The GOMAL Foundation · Ogbomoso, Oyo State, Nigeria",
+    credits: {
+      prefix: "Built with ❤️ by",
+      separator: " and ",
+      builders: [
+        { name: "DevFeranmi", href: "https://devferanmi.xyz" },
+        { name: "Adeola", href: "https://github.com/faithadeola/" },
+      ],
+    },
   },
 } as const;

@@ -63,8 +63,12 @@ function SplashPerformance() {
   const { splash } = contents;
   const D = splash.durationMs / 1000;
 
-  // no scrolling underneath while the performance runs
+  // no scrolling underneath while the performance runs.
+  // NOTE: useGSAP is a LAYOUT effect and runs before this one — on hash
+  // deep-links (or reduced motion) the splash finishes there instantly,
+  // so locking here afterwards would freeze the page forever.
   useEffect(() => {
+    if (finishedRef.current) return;
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
