@@ -5,6 +5,7 @@ import { ConferenceScreen } from "@features/conference/screen/conference-screen"
 export const metadata: Metadata = {
   title: contents.conference.section.heading,
   description: contents.conference.modal.intro,
+  alternates: { canonical: "/conference" },
 };
 
 export default function ConferencePage() {
