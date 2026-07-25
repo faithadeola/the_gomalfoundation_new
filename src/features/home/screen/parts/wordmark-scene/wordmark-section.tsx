@@ -16,10 +16,13 @@ const STRIP_ROWS = 11;
 function makeOdometer(strips: HTMLElement[], target: number) {
   const value = { v: 0 };
   const layout = () => {
+    // row height in px — each row is h-[20vh]
+    const rowH = window.innerHeight * 0.2;
     strips.forEach((strip) => {
       const place = Number(strip.dataset.place ?? "0");
-      const p = (value.v / Math.pow(10, place)) % 10;
-      gsap.set(strip, { yPercent: -(p * 100) / STRIP_ROWS });
+      // correctly isolate the digit at this place before taking remainder
+      const p = Math.floor(value.v / Math.pow(10, place)) % 10;
+      gsap.set(strip, { y: -p * rowH });
     });
   };
   layout();
@@ -195,7 +198,7 @@ export function WordmarkSection() {
                     {Array.from({ length: STRIP_ROWS }, (_, r) => (r === 10 ? 0 : r)).map((d, r) => (
                       <span
                         key={r}
-                        className="flex h-[20vh] items-center justify-center font-display font-black text-marigold text-[13vh] leading-none"
+                        className="flex h-[20vh] items-center justify-center font-display font-black text-marigold text-[10vh] leading-none"
                       >
                         {d}
                       </span>

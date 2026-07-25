@@ -77,7 +77,6 @@ export function GiveSection() {
             1.5
           );
         }
-        tl.fromTo(".gv-trust", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.6 }, 1.9);
       });
     },
     { scope }
@@ -177,9 +176,6 @@ export function GiveSection() {
               strokeLinecap="round"
             />
           </svg>
-          <p className="gv-trust mt-3 text-[0.75rem] font-semibold tracking-wide text-ink/50 motion-safe:opacity-0">
-            {give.trustSignal}
-          </p>
         </div>
       </div>
     </section>

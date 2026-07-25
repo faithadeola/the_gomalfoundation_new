@@ -35,17 +35,17 @@ export const giveContents = {
     bank: {
       heading: "Give by bank transfer",
       accountNameLabel: "Account name",
-      accountName: "The GOMAL Foundation",
+      accountName: "Gabriel and Margaret Lasehinde",
       accountNumberLabel: "Account number",
-      accountNumber: "0123456789",
+      accountNumber: "2330170062",
       bankLabel: "Bank",
-      bankName: "First Bank of Nigeria",
+      bankName: "Zenith Bank",
       copyLabel: "Copy",
       copiedLabel: "Copied!",
       afterTransferNote:
         "After transferring, send your name and amount to give@lasehinde.org so we can acknowledge your gift.",
       internationalNote: "Giving from outside Nigeria? Email give@lasehinde.org and we'll arrange it.",
     },
-    trustSignal: "Payments secured by Paystack — trusted by millions of Nigerians",
+    trustSignal: "",
   },
 } as const;
