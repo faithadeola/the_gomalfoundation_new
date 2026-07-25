@@ -5,8 +5,8 @@ export const footerContents = {
     foundationLinks: [
       { label: "About the Foundation", href: "#foundation" },
       { label: "Four Focus Areas", href: "#foundation" },
-      { label: "GROWTHLAB 2.0", href: "#foundation" },
-      { label: "Inaugural Couples' Conference", href: "#foundation" },
+      { label: "GROWTHLAB 2.0", href: "#gallery" },
+      { label: "Inaugural Couples' Conference", href: "#conference" },
     ],
     actionLinks: [
       { label: "Give to the Foundation", href: "/give" },

@@ -37,7 +37,7 @@ export function PartnershipScreen() {
               <h2 className="font-display font-bold text-[1.25rem] mb-5" style={{ fontVariationSettings: "'wdth' 88" }}>
                 {partnership.page.waysToPartnerHeading}
               </h2>
-              <ul className="space-y-3">
+              <ul className="grid grid-cols-2 sm:grid-cols-3 gap-3 lg:grid-cols-1 lg:gap-0 lg:space-y-3">
                 {partnership.focusPairs.map((pair) => (
                   <li key={pair.type} className="rounded-xl bg-parchment-deep/60 border border-ink/10 px-5 py-3.5">
                     <p className="text-[0.875rem] font-bold">{partnership.typeLabels[pair.type]}</p>

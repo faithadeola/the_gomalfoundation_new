@@ -80,7 +80,7 @@ export function ConferenceSection() {
           scrollTrigger: {
             trigger: stage,
             start: "top top",
-            end: "+=300%",
+            end: "+=220%",
             scrub: 0.8,
             pin: true,
             anticipatePin: 1,
@@ -128,15 +128,15 @@ export function ConferenceSection() {
           { y: "0%", autoAlpha: 1, stagger: 0.12, duration: 1.2 },
           8.4
         );
-        tl.fromTo(".cf-body", { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 1.2 }, 10.2);
+        tl.fromTo(".cf-body", { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 1.2 }, 9.6);
         tl.fromTo(
           ".cf-cta",
           { scale: 0.6, autoAlpha: 0 },
           { scale: 1, autoAlpha: 1, duration: 1, ease: "back.out(1.8)" },
-          11.2
+          10.4
         );
-        tl.addLabel("cf-done", 12.6);
-        tl.to({}, { duration: 1.4 });
+        tl.addLabel("cf-done", 11.4);
+        tl.to({}, { duration: 1.2 });
       });
     },
     { scope }
@@ -206,19 +206,12 @@ export function ConferenceSection() {
         >
           {conference.section.body}
         </motion.p>
-        <motion.div
-          initial={theatre ? false : { scale: 0.6, opacity: 0 }}
-          whileInView={theatre ? undefined : { scale: 1, opacity: 1 }}
-          viewport={{ once: true, amount: 0.8 }}
-          transition={{ type: "spring", stiffness: 300, damping: 18, delay: 0.9 }}
+        <Link
+          href={ROUTES.CONFERENCE}
+          className="cf-cta mt-9 inline-flex items-center gap-2 rounded-full bg-coral text-ink text-[0.9375rem] font-semibold px-8 py-3.5 hover:bg-marigold hover:rotate-1 transition-all duration-300 md:motion-safe:opacity-0"
         >
-          <Link
-            href={ROUTES.CONFERENCE}
-            className="cf-cta mt-9 inline-flex items-center gap-2 rounded-full bg-coral text-ink text-[0.9375rem] font-semibold px-8 py-3.5 hover:bg-marigold hover:rotate-1 transition-all duration-300 md:motion-safe:opacity-0"
-          >
-            {conference.section.cta}
-          </Link>
-        </motion.div>
+          {conference.section.cta}
+        </Link>
       </div>
     </section>
   );
