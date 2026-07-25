@@ -1,9 +1,53 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { contents } from "@contents";
 import { SiteNav } from "@features/home/screen/parts/navigation/site-nav";
 import { SiteFooter } from "@features/home/screen/parts/footer/site-footer";
 import { PartnershipForm } from "../components/partnership-form";
+
+type FocusPair = { readonly type: string; readonly desc: string };
+type TypeLabels = Record<string, string>;
+
+function MobilePairsGrid({ pairs, typeLabels }: { pairs: readonly FocusPair[]; typeLabels: TypeLabels }) {
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [cols, setCols] = useState(2);
+
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth;
+      setIsDesktop(w >= 1024);
+      setCols(w >= 640 ? 3 : 2);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+
+  if (isDesktop) {
+    return (
+      <ul style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+        {pairs.map((pair) => (
+          <li key={pair.type} style={{ borderRadius: "0.75rem", background: "rgba(243,226,205,0.6)", border: "1px solid rgba(18,48,42,0.1)", padding: "0.875rem 1.25rem" }}>
+            <p style={{ fontSize: "0.875rem", fontWeight: 700 }}>{typeLabels[pair.type]}</p>
+            <p style={{ fontSize: "0.8125rem", color: "rgba(18,48,42,0.6)" }}>{pair.desc}</p>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap: "0.75rem" }}>
+      {pairs.map((pair) => (
+        <div key={pair.type} style={{ borderRadius: "0.75rem", background: "rgba(243,226,205,0.6)", border: "1px solid rgba(18,48,42,0.1)", padding: "0.875rem 1.25rem" }}>
+          <p style={{ fontSize: "0.875rem", fontWeight: 700 }}>{typeLabels[pair.type]}</p>
+          <p style={{ fontSize: "0.8125rem", color: "rgba(18,48,42,0.6)" }}>{pair.desc}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export function PartnershipScreen() {
   const { partnership } = contents;
@@ -37,22 +81,7 @@ export function PartnershipScreen() {
               <h2 className="font-display font-bold text-[1.25rem] mb-5" style={{ fontVariationSettings: "'wdth' 88" }}>
                 {partnership.page.waysToPartnerHeading}
               </h2>
-              <div className="lg:hidden grid gap-3" style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
-                {partnership.focusPairs.map((pair) => (
-                  <div key={pair.type} className="rounded-xl bg-parchment-deep/60 border border-ink/10 px-5 py-3.5">
-                    <p className="text-[0.875rem] font-bold">{partnership.typeLabels[pair.type]}</p>
-                    <p className="text-[0.8125rem] text-ink/60">{pair.desc}</p>
-                  </div>
-                ))}
-              </div>
-              <ul className="hidden lg:flex lg:flex-col lg:gap-3">
-                {partnership.focusPairs.map((pair) => (
-                  <li key={pair.type} className="rounded-xl bg-parchment-deep/60 border border-ink/10 px-5 py-3.5">
-                    <p className="text-[0.875rem] font-bold">{partnership.typeLabels[pair.type]}</p>
-                    <p className="text-[0.8125rem] text-ink/60">{pair.desc}</p>
-                  </li>
-                ))}
-              </ul>
+              <MobilePairsGrid pairs={partnership.focusPairs} typeLabels={partnership.typeLabels} />
               <div className="mt-8 rounded-xl bg-evergreen-deep text-parchment px-6 py-5">
                 <p className="font-bold text-[0.9375rem] mb-1">{partnership.page.trustCard.heading}</p>
                 <p className="text-[0.8125rem] text-parchment/70 leading-[1.6]">{partnership.page.trustCard.body}</p>
