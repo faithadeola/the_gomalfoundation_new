@@ -3,6 +3,7 @@ import { Bricolage_Grotesque, Fraunces, Outfit } from "next/font/google";
 import "./globals.css";
 import { contents } from "@contents";
 import { SITE_URL } from "@shared/config/site";
+import Script from "next/dist/client/script";
 
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -138,6 +139,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
         {children}
+        <Script src="https://scripts.simpleanalyticscdn.com/latest.js"  />
       </body>
     </html>
   );
