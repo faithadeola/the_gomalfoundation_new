@@ -78,23 +78,6 @@ export function SiteFooter() {
           <p className="serif-soft font-serif italic text-[0.75rem] text-parchment/45">{site.contact.foundationEmail}</p>
         </div>
 
-        {/* credits */}
-        <p className="mt-5 text-center text-[0.7rem] text-parchment/40">
-          {footer.credits.prefix}{" "}
-          {footer.credits.builders.map((builder, i) => (
-            <span key={builder.name}>
-              {i > 0 ? footer.credits.separator : null}
-              <a
-                href={builder.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-parchment/60 hover:text-marigold underline underline-offset-2 transition-colors"
-              >
-                {builder.name}
-              </a>
-            </span>
-          ))}
-        </p>
       </div>
     </footer>
   );

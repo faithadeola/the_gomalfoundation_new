@@ -106,6 +106,7 @@ export function GallerySection() {
         //    right (0 → 4)
         tl.fromTo(".ga-title", { x: "-45vw", autoAlpha: 0 }, { x: "0vw", autoAlpha: 1, duration: 1.6, ease: "power2.out" }, 0.2);
         tl.fromTo(".ga-title-char", { autoAlpha: 0 }, { autoAlpha: 1, stagger: 0.03, duration: 0.02 }, 0.5);
+        tl.fromTo(".ga-sub-word", { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, stagger: 0.06, duration: 0.4, ease: "power2.out" }, 1.1);
         tl.to(".ga-title", { x: "55vw", autoAlpha: 0, duration: 1.6, ease: "power2.in" }, 2.6);
         tl.addLabel("ga-title-out", 4.2);
 
@@ -155,7 +156,7 @@ export function GallerySection() {
       {/* ───────── theatre — all viewports ───────── */}
       <div className="hidden motion-safe:block absolute inset-0">
         {/* the sweeping title */}
-        <div className="ga-title absolute inset-x-0 top-[44%] text-center opacity-0 pointer-events-none">
+        <div className="ga-title absolute inset-x-0 top-[38%] text-center opacity-0 pointer-events-none">
           <p className="text-[12px] font-semibold tracking-[0.22em] uppercase text-blush mb-3">{gallery.eyebrow}</p>
           <p
             className="font-display font-black uppercase text-[clamp(2.25rem,5vw,4.25rem)]"
@@ -164,6 +165,13 @@ export function GallerySection() {
             {Array.from(gallery.heading).map((char, i) => (
               <span key={i} className="ga-title-char">
                 {char}
+              </span>
+            ))}
+          </p>
+          <p className="serif-soft mt-4 font-serif italic text-blush/80 text-[clamp(0.8125rem,1.2vw,1rem)] max-w-[52ch] mx-auto leading-[1.6]">
+            {gallery.subheading.split(" ").map((word, i) => (
+              <span key={i} className="ga-sub-word inline-block mr-[0.28em] opacity-0">
+                {word}
               </span>
             ))}
           </p>
@@ -245,10 +253,13 @@ export function GallerySection() {
             {gallery.eyebrow}
           </p>
           <p
-            className="font-display font-black uppercase text-[clamp(1.75rem,7vw,2.5rem)] mb-8"
+            className="font-display font-black uppercase text-[clamp(1.75rem,7vw,2.5rem)] mb-3"
             style={{ fontVariationSettings: "'wdth' 84" }}
           >
             {gallery.heading}
+          </p>
+          <p className="serif-soft font-serif italic text-blush/80 text-[0.875rem] leading-[1.6] mb-8">
+            {gallery.subheading}
           </p>
         </div>
         <div className="space-y-4">

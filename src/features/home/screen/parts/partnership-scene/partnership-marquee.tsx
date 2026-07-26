@@ -180,20 +180,24 @@ export function PartnershipMarquee() {
           </p>
         </motion.div>
 
-        {/* the seven tickets — raining in on mobile */}
-        <div className="mt-10 md:mt-8 flex flex-wrap justify-center gap-3">
+        {/* the seven tickets — 2-col grid on mobile, free wrap on desktop */}
+        <div
+          className="mt-10 md:mt-8 gap-3"
+          style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}
+        >
           {partnership.focusPairs.map((pair, i) => (
-            <motion.span
+            <motion.div
               key={pair.type}
               initial={theatre ? false : { y: -60, rotate: jig(i * 3 + 1, 16), opacity: 0 }}
               whileInView={theatre ? undefined : { y: 0, rotate: jig(i, 3), opacity: 1 }}
               viewport={{ once: true, amount: 0.5 }}
               transition={{ type: "spring", stiffness: 260, damping: 20, delay: i * 0.07 }}
-              className="pm-chip inline-flex flex-col rounded-xl bg-parchment text-ink px-5 py-3 shadow-[0_12px_28px_rgba(4,26,21,0.35)] max-w-[240px]"
+              className="pm-chip flex flex-col rounded-xl bg-parchment text-ink px-5 py-3 shadow-[0_12px_28px_rgba(4,26,21,0.35)]"
+              style={i === partnership.focusPairs.length - 1 ? { gridColumn: "1 / -1", maxWidth: "calc(50% - 0.375rem)", margin: "0 auto", width: "100%" } : undefined}
             >
               <span className="text-[0.8125rem] font-bold">{partnership.typeLabels[pair.type]}</span>
               <span className="text-[0.6875rem] text-ink/60 leading-snug mt-0.5">{pair.desc}</span>
-            </motion.span>
+            </motion.div>
           ))}
         </div>
 
