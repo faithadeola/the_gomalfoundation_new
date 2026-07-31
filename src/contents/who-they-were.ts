@@ -28,13 +28,13 @@ export const whoTheyWereContents = {
       {
         icon: "Church",
         eyebrow: "The Church",
-        title: "A presence that cannot be replaced",
-        body: "Baba's chair at the front pew has not been filled since he passed. The congregation has not tried.",
+        title: "Generals of faith, at rest",
+        body: "They fought the fight. They finished the race. They kept the faith",
       },
     ],
     darkQuote: {
-      text: "Baba's chair at the front pew will never be filled by anyone else. We have tried not to replace it.",
-      citation: "— Rev. Seun Adeyemi, Church, Ogbomoso",
+      text: "These generals of faith are now at rest",
+      citation: "— The congregation, Ogbomoso",
     },
     stats: [
       { num: "25", label: "years at GOMAL" },

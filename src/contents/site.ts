@@ -49,9 +49,9 @@ export const siteContents = {
       },
     },
     contact: {
-      giveEmail: "give@lasehinde.org",
-      foundationEmail: "foundation@lasehinde.org",
-      noreplyEmail: "noreply@lasehinde.org",
+      giveEmail: "babaandmamagomalfoundation@gmail.com",
+      foundationEmail: "babaandmamagomalfoundation@gmail.com",
+      noreplyEmail: "babaandmamagomalfoundation@gmail.com",
     },
     address: {
       city: "Ogbomoso",
